@@ -15,14 +15,18 @@ parse.data <- function(x) {
   
   # Convert to datatypes I can use
   df$summary <- lapply(df$summary, as.character)
-  df$startdt <- as.Date(df$start,format="%Y%m%dT%H%M%SZ",tz="EST") # Date for timediff
+  df$startdt <- as.Date(df$start,format="%Y%m%dT%H%M%SZ",tz="EST") # Date for timediff and comparisons
+  df$enddt <- as.Date(df$start,format="%Y%m%dT%H%M%SZ",tz="EST") # Date for timediff and comparisons
   df$start <- as.POSIXlt(df$start,format="%Y%m%dT%H%M%SZ",tz="EST") # POSIXlt for wkday
   df$end <- as.POSIXlt(df$end,format="%Y%m%dT%H%M%SZ",tz="EST") # POSIXlt for wkday
 
   return(df)  
 }
 
-prep.for.plot <- function(df) {
+prep.for.plot <- function(df,fromdt,todt) {
+  # Restrict to the daterange from the slider
+  df <- df[fromdt <= df$startdt & todt > df$enddt,]
+  
   # For each half hour period of the week, get a list of all the events I've gone to in that time
   half.hour.of.week <- function(x) {(x$wday*24*60 + x$hour*60 + x$min) %/% 30}
   halfhrs <- list()
@@ -46,7 +50,7 @@ function(input, output) {
   
   output$distPlot <- renderPlot({
     # Plot!
-    toplot <- prep.for.plot(parse.data(x))
+    toplot <- prep.for.plot(parse.data(x),input$date_range[1],input$date_range[2])
     ggplot(data=toplot, aes(x=halfhr,y=cnt)) + geom_line()
   })
 }
