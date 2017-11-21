@@ -48,9 +48,19 @@ function(input, output) {
   # }
   # x <- readLines(inFile)
   
+  mydf <- parse.data(x)
+  
+  output$date_slider <- renderUI({
+    dateRangeInput("date_range",
+                   "Date Range",
+                   start = min(mydf$startdt),
+                   end = max(mydf$enddt)
+                   )
+  })
+  
   output$distPlot <- renderPlot({
     # Plot!
-    toplot <- prep.for.plot(parse.data(x),input$date_range[1],input$date_range[2])
+    toplot <- prep.for.plot(mydf,input$date_range[1],input$date_range[2])
     ggplot(data=toplot, aes(x=halfhr,y=cnt)) + geom_line()
   })
 }
