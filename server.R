@@ -1,5 +1,6 @@
 library(shiny)
 library(ggplot2)
+library(scales)
 fc = file(description="~/workspace/Schedule Density/natezmatthews@gmail.com.ics")
 x <- readLines(fc)
 
