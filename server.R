@@ -33,11 +33,29 @@ prep.for.plot <- function(df,fromdt,todt) {
   for(i in 1:(7*24*2)) {halfhrs[[ i ]] <- df$summary[(half.hour.of.week(df$start) <= i) & (half.hour.of.week(df$end) > i)]}
   
   # Prep for plotting
-  toplot <- data.frame(cbind(1:(24*7*2),unlist(lapply(halfhrs,length))))
-  half.hours.possible <- as.integer((Sys.Date() - min(df$startdt))*7*24*2)
+  toplot <- data.frame(cbind(1:(7*24*2),unlist(lapply(halfhrs,length))))
+  half.hours.possible <- as.integer(todt - min(df$startdt))/7
   toplot[2] <- toplot[2] / half.hours.possible # Convert to % of all half hours in time period
   colnames(toplot) <- c("halfhr","cnt")
   return(toplot)
+}
+
+weekday.plot <- function(df,fromdt,todt,eras=1) {
+  # Restrict to the daterange from the slider
+  df <- df[fromdt <= df$startdt & todt > df$enddt,]
+  
+  half.hour.of.day <- function(x) {(x$hour*60 + x$min) %/% 30}
+  events.matrix <- matrix(nrow=24*2,ncol=7)
+  count.matrix <- matrix(nrow=24*2,ncol=7)
+  for(j in 1:7) {
+    for(i in 1:(24*2)) {
+      events.matrix[i,j] <- df$summary[(half.hour.of.day(df$start) <= i) & (half.hour.of.day(df$end) > i) & (df$start$wday == j)]
+      count.matrix[i,j] <- length(events.matrix[i,j])
+    }
+  }
+  half.hours.possible <- as.integer(todt - min(df$startdt))/7
+  
+  
 }
 
 # Define server logic required to draw a histogram
