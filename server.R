@@ -16,17 +16,17 @@ parse.data <- function(x) {
   
   # Convert to datatypes I can use
   df$summary <- lapply(df$summary, as.character)
-  df$startdt <- as.Date(df$start,format="%Y%m%dT%H%M%SZ",tz="EST") # Date for timediff and comparisons
-  df$enddt <- as.Date(df$start,format="%Y%m%dT%H%M%SZ",tz="EST") # Date for timediff and comparisons
-  df$start <- as.POSIXlt(df$start,format="%Y%m%dT%H%M%SZ",tz="EST") # POSIXlt for wkday
-  df$end <- as.POSIXlt(df$end,format="%Y%m%dT%H%M%SZ",tz="EST") # POSIXlt for wkday
+  df$start <- as.POSIXct(df$start,format="%Y%m%dT%H%M%SZ",tz="UTC") # POSIXlt for wkday
+  df$end <- as.POSIXct(df$end,format="%Y%m%dT%H%M%SZ",tz="UTC") # POSIXlt for wkday
+  df$start <- as.POSIXlt(df$start,tz="EST") # POSIXlt for wkday
+  df$end <- as.POSIXlt(df$end,tz="EST") # POSIXlt for wkday
 
   return(df)  
 }
 
 prep.for.plot <- function(df,fromdt,todt) {
   # Restrict to the daterange from the slider
-  df <- df[fromdt <= df$startdt & todt > df$enddt,]
+  df <- df[fromdt <= df$start & todt > df$end,]
   
   # For each half hour period of the week, get a list of all the events I've gone to in that time
   half.hour.of.week <- function(x) {(x$wday*24*60 + x$hour*60 + x$min) %/% 30}
@@ -43,7 +43,7 @@ prep.for.plot <- function(df,fromdt,todt) {
 
 weekday.plot <- function(df,fromdt,todt) {
   # Restrict to the daterange from the slider
-  df <- df[fromdt <= df$startdt & todt > df$enddt,]
+  df <- df[as.POSIXct(fromdt) <= df$start & as.POSIXct(todt) > df$end,]
   
   half.hour.of.day <- function(x) {(x$hour*60 + x$min) %/% 30}
   events.matrix <- matrix(list(),nrow=24*2,ncol=7)
@@ -56,14 +56,14 @@ weekday.plot <- function(df,fromdt,todt) {
       count.matrix[i,j] <- lengths(events.matrix[i,j])
     }
   }
-  half.hours.possible <- as.integer(Sys.Date() - min(df$startdt))/7
+  half.hours.possible <- as.integer(as.POSIXct(Sys.Date()) - min(df$start))/7
   
   toplot <- as.data.frame(count.matrix / half.hours.possible)
   toplot <- cbind(toplot,seq(
-    from=as.POSIXct("2017-1-1 0:00"),
-    to=as.POSIXct("2017-1-1 23:30"),
-    by=60*30
-  )
+                              from=as.POSIXct("2017-1-1 0:00"),
+                              to=as.POSIXct("2017-1-1 23:30"),
+                              by=60*30
+                            )
   )
   colnames(toplot) <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun","Time")
   for (i in 1:7) {
@@ -85,13 +85,12 @@ function(input, output) {
   output$date_slider <- renderUI({
     dateRangeInput("date_range",
                    "Date Range",
-                   start = min(mydf$startdt),
-                   end = max(mydf$enddt)
+                   start = min(mydf$start),
+                   end = max(mydf$end)
                    )
   })
   
   output$distPlot <- renderPlot({
-    # Plot!
     toplot <- weekday.plot(mydf,input$date_range[1],input$date_range[2])
     colors <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
     p <- ggplot(toplot,aes(x=Time)) + 
