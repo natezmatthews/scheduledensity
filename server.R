@@ -95,6 +95,8 @@ function(input, output) {
     toplot <- weekday.plot(mydf,input$date_range[1],input$date_range[2])
     gvisLineChart(toplot,xvar="Time",yvar=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"),
                        options=list(vAxis="{title:'% weeks with plans',
-                                        format:'#,###%'}"))
+                                        format:'#,###%'}",
+                                    width = "automatic",
+                                    height =400))
   })
 }

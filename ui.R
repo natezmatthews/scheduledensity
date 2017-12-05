@@ -5,16 +5,16 @@ library(googleVis)
 fluidPage(
   
   # Application title
-  titlePanel("Hello World!"),
+  titlePanel("When am I usually free?"),
   
-  # Sidebar with a slider input for the number of bins
-  sidebarLayout(
-    sidebarPanel(
+  htmlOutput("distPlot"),
+  
+  hr(),
+  
+  fluidRow(
+    column(12,
       fileInput("icsfile","Choose ics file"),
       uiOutput("date_slider")
-    ),
-    mainPanel(
-      htmlOutput("distPlot")
     )
   )
 )
