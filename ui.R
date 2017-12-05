@@ -1,4 +1,5 @@
 library(shiny)
+library(googleVis)
 
 # Define UI for application that draws a histogram
 fluidPage(
@@ -13,7 +14,7 @@ fluidPage(
       uiOutput("date_slider")
     ),
     mainPanel(
-      plotOutput("distPlot")
+      htmlOutput("distPlot")
     )
   )
 )

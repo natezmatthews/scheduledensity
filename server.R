@@ -1,5 +1,6 @@
 library(shiny)
-library(ggplot2)
+# library(ggplot2)
+library(googleVis)
 library(scales)
 fc = file(description="~/workspace/Schedule Density/natezmatthews@gmail.com.ics")
 x <- readLines(fc)
@@ -90,16 +91,10 @@ function(input, output) {
                    )
   })
   
-  output$distPlot <- renderPlot({
+  output$distPlot <- renderGvis({
     toplot <- weekday.plot(mydf,input$date_range[1],input$date_range[2])
-    colors <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-    p <- ggplot(toplot,aes(x=Time)) + 
-      scale_x_datetime("", date_labels = "%I:%M %p") +
-      scale_y_continuous(labels=percent) +
-      ylab("% of weeks with plans")
-    for (i in 1:7) {
-      p <- p + geom_line(aes_string(y = colnames(toplot)[i]),colour=colors[i])
-    }
-    return(p)
+    gvisLineChart(toplot,xvar="Time",yvar=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"),
+                       options=list(vAxis="{title:'% weeks with plans',
+                                        format:'#,###%'}"))
   })
 }
