@@ -2,7 +2,7 @@ library(shiny)
 # library(ggplot2)
 library(googleVis)
 library(scales)
-fc = file(description="~/workspace/Schedule Density/natezmatthews@gmail.com.ics")
+fc = file(description="natezmatthews@gmail.com.ics")
 x <- readLines(fc)
 close(fc)
 
