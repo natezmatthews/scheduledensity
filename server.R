@@ -78,7 +78,7 @@ function(input, output) {
       mydf <- parse.data(readLines(inFile$datapath))
     }
     dateRangeInput("date_range",
-                   "Date Range",
+                   "Restrict the date range",
                    start = min(mydf$start),
                    end = max(mydf$end)
                    )
@@ -94,9 +94,10 @@ function(input, output) {
     tool.tips = unlist(lapply(week.days,function(x){paste(x,"html","tooltip",sep=".")}))
     yvarcols = as.vector(t(cbind(week.days,tool.tips)))
     gvisLineChart(toplot,xvar="Time",yvar=yvarcols,
-                        options=list(vAxis="{title:'% weeks with plans',
+                        options=list(vAxis="{title:'% of weeks that have plans',
                                      format:'#,###%'}",
                                      tooltip="{isHtml:'true'}",
-                                     height=400))
+                                     width="automatic",
+                                     height=450))
   })
 }
