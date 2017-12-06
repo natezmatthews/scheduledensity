@@ -4,6 +4,7 @@ library(googleVis)
 library(scales)
 fc = file(description="~/workspace/Schedule Density/natezmatthews@gmail.com.ics")
 x <- readLines(fc)
+close(fc)
 
 parse.data <- function(x) {
   # Turn it into a nice dataframe with a row per event I can use
@@ -85,15 +86,13 @@ weekday.plot <- function(df,fromdt,todt) {
 
 # Define server logic required to draw a histogram
 function(input, output) {
-  rct <- reactive(inFile <- input$icsfile)
-  # if (is.null(inFile)) {
-  #   return(NULL)
-  # }
-  # x <- readLines(inFile)
-  
   mydf <- parse.data(x)
   
   output$date_slider <- renderUI({
+    inFile <- input$icsfile
+    if (!is.null(inFile)) {
+      mydf <- parse.data(readLines(inFile$datapath))
+    }
     dateRangeInput("date_range",
                    "Date Range",
                    start = min(mydf$start),
@@ -102,6 +101,10 @@ function(input, output) {
   })
   
   output$distPlot <- renderGvis({
+    inFile <- input$icsfile
+    if (!is.null(inFile)) {
+      mydf <- parse.data(readLines(inFile$datapath))
+    }
     toplot <- weekday.plot(mydf,input$date_range[1],input$date_range[2])
     week.days <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
     tool.tips = unlist(lapply(week.days,function(x){paste(x,"html","tooltip",sep=".")}))
