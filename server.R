@@ -28,7 +28,9 @@ parse.data <- function(x) {
 
 weekday.plot <- function(df,fromdt,todt) {
   # Restrict to the daterange from the slider
-  df <- df[as.POSIXct(fromdt) <= df$start & as.POSIXct(todt) > df$end,]
+  if (!is.null(fromdt) & !is.null(todt)) {
+    df <- df[as.POSIXct(fromdt) <= df$start & as.POSIXct(todt) > df$end,] 
+  }
   
   half.hour.of.day <- function(x) {(x$hour*60 + x$min) %/% 30}
   half.hours.possible <- as.integer(as.POSIXct(Sys.Date()) - min(df$start))/7
@@ -67,7 +69,6 @@ weekday.plot <- function(df,fromdt,todt) {
   return(toplot)
 }
 
-# Define server logic required to draw a histogram
 function(input, output) {
   mydf <- parse.data(x)
   
