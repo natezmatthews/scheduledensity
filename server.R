@@ -26,23 +26,6 @@ parse.data <- function(x) {
   return(df)  
 }
 
-prep.for.plot <- function(df,fromdt,todt) {
-  # Restrict to the daterange from the slider
-  df <- df[fromdt <= df$start & todt > df$end,]
-  
-  # For each half hour period of the week, get a list of all the events I've gone to in that time
-  half.hour.of.week <- function(x) {(x$wday*24*60 + x$hour*60 + x$min) %/% 30}
-  halfhrs <- list()
-  for(i in 1:(7*24*2)) {halfhrs[[ i ]] <- df$summary[(half.hour.of.week(df$start) <= i) & (half.hour.of.week(df$end) > i)]}
-  
-  # Prep for plotting
-  toplot <- data.frame(cbind(1:(7*24*2),unlist(lapply(halfhrs,length))))
-  half.hours.possible <- as.integer(todt - min(df$startdt))/7
-  toplot[2] <- toplot[2] / half.hours.possible # Convert to % of all half hours in time period
-  colnames(toplot) <- c("halfhr","cnt")
-  return(toplot)
-}
-
 weekday.plot <- function(df,fromdt,todt) {
   # Restrict to the daterange from the slider
   df <- df[as.POSIXct(fromdt) <= df$start & as.POSIXct(todt) > df$end,]
