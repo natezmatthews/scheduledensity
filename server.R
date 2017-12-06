@@ -47,29 +47,39 @@ weekday.plot <- function(df,fromdt,todt) {
   df <- df[as.POSIXct(fromdt) <= df$start & as.POSIXct(todt) > df$end,]
   
   half.hour.of.day <- function(x) {(x$hour*60 + x$min) %/% 30}
-  events.matrix <- matrix(list(),nrow=24*2,ncol=7)
-  count.matrix <- matrix(0,nrow=24*2,ncol=7)
-  for(j in 1:7) {
+  half.hours.possible <- as.integer(as.POSIXct(Sys.Date()) - min(df$start))/7
+  week.days <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
+  tool.tips = unlist(lapply(week.days,function(x){paste(x,"html","tooltip",sep=".")}))
+  toplot <- data.frame(Mon=numeric(24*2),
+                       Mon.html.tooltip=character(24*2),
+                       Tue=numeric(24*2),
+                       Tue.html.tooltip=character(24*2),
+                       Wed=numeric(24*2),
+                       Wed.html.tooltip=character(24*2),
+                       Thu=numeric(24*2),
+                       Thu.html.tooltip=character(24*2),
+                       Fri=numeric(24*2),
+                       Fri.html.tooltip=character(24*2),
+                       Sat=numeric(24*2),
+                       Sat.html.tooltip=character(24*2),
+                       Sun=numeric(24*2),
+                       Sun.html.tooltip=character(24*2),
+                       stringsAsFactors=FALSE)
+  for (j in 1:7) {
     for(i in 1:(24*2)) {
-      events.matrix[i,j] <- list(df$summary[(half.hour.of.day(df$start) <= i)
-                                            & (half.hour.of.day(df$end) > i)
-                                            & (df$start$wday == j-1)])
-      count.matrix[i,j] <- lengths(events.matrix[i,j])
+      event.list <- df$summary[(half.hour.of.day(df$start) <= i)
+                               & (half.hour.of.day(df$end) > i)
+                               & (df$start$wday == j-1)]
+      toplot[[week.days[j]]][i] <- length(event.list) / half.hours.possible
+      toplot[[tool.tips[j]]][i] <- paste0(event.list,collapse="<br>")
     }
   }
-  half.hours.possible <- as.integer(as.POSIXct(Sys.Date()) - min(df$start))/7
-  
-  toplot <- as.data.frame(count.matrix / half.hours.possible)
-  toplot <- cbind(toplot,seq(
-                              from=as.POSIXct("2017-1-1 0:00"),
-                              to=as.POSIXct("2017-1-1 23:30"),
-                              by=60*30
-                            )
+  toplot <- cbind(toplot,Time=seq(
+                    from=as.POSIXct("2017-1-1 0:00"),
+                    to=as.POSIXct("2017-1-1 23:30"),
+                    by=60*30
+                  )
   )
-  colnames(toplot) <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun","Time")
-  for (i in 1:7) {
-    toplot[,i] <- as.numeric(as.character(toplot[,i]))
-  }
   return(toplot)
 }
 
@@ -93,10 +103,13 @@ function(input, output) {
   
   output$distPlot <- renderGvis({
     toplot <- weekday.plot(mydf,input$date_range[1],input$date_range[2])
-    gvisLineChart(toplot,xvar="Time",yvar=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"),
-                       options=list(vAxis="{title:'% weeks with plans',
-                                        format:'#,###%'}",
-                                    width = "automatic",
-                                    height =400))
+    week.days <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
+    tool.tips = unlist(lapply(week.days,function(x){paste(x,"html","tooltip",sep=".")}))
+    yvarcols = as.vector(t(cbind(week.days,tool.tips)))
+    gvisLineChart(toplot,xvar="Time",yvar=yvarcols,
+                        options=list(vAxis="{title:'% weeks with plans',
+                                     format:'#,###%'}",
+                                     tooltip="{isHtml:'true'}",
+                                     height=400))
   })
 }
