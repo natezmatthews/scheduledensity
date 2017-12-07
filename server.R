@@ -13,7 +13,11 @@ parse.data <- function(x,input_tz) {
   keyval <- keyval[keyval[,1] %in% c("DTSTART","DTEND","SUMMARY"),]
   df <- reshape(keyval, timevar="1", idvar="id", direction = "wide")
   df <- df[complete.cases(df),]
-  colnames(df) <- c("id","start","end","summary")
+  
+  # Nicer names to work with in my opinion
+  colnames(df)[colnames(df)=="2.DTSTART"] <- "start"
+  colnames(df)[colnames(df)=="2.DTEND"] <- "end"
+  colnames(df)[colnames(df)=="2.SUMMARY"] <- "summary"
   
   # Convert to datatypes I can use
   df$summary <- lapply(df$summary, as.character)

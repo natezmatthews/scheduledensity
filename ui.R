@@ -26,7 +26,7 @@ fluidPage(
               When you first visit this page you will see the chart generated from my calendar file.
               Try exporting your calendar to the common ICS format, and uploading that ICS file here. Hover over the lines to see the names of the events 
               that you had at that time and on that day of the week. If instead of looking at your whole calendar you would like to focus on events from a 
-             particular time period, use the data slider. This tool will assume that the times in your calendar are recorded in UTC; 
+              particular time period, use the data slider. This tool will assume that the times in your calendar are recorded in UTC; 
               change the timezone dropdown to adjust the times to your time zone."),
            br()
     ),
