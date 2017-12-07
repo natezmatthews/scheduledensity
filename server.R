@@ -107,7 +107,7 @@ function(input, output) {
     tool.tips = unlist(lapply(week.days,function(x){paste(x,"html","tooltip",sep=".")}))
     yvarcols = as.vector(t(cbind(week.days,tool.tips)))
     gvisLineChart(toplot,xvar="Time",yvar=yvarcols,
-                        options=list(vAxis="{title:'% of weeks that have plans',
+                        options=list(vAxis="{title:'% of weeks that had plans',
                                      format:'#,###%'}",
                                      tooltip="{isHtml:'true'}",
                                      height=450))
