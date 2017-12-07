@@ -21,8 +21,12 @@ fluidPage(
   fluidRow(
     column(12,
       align="center",
-      fileInput("icsfile","Choose ics file"),
-      uiOutput("date_slider")
+      fileInput("ics_file","Choose ics file"),
+      uiOutput("date_slider"),
+      selectInput("timezone_dropdown",
+                  "Change time zone",
+                  OlsonNames()
+                  )
     )
   )
 )

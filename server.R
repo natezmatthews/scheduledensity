@@ -84,7 +84,7 @@ function(input, output) {
   })
   
   output$distPlot <- renderGvis({
-    inFile <- input$icsfile
+    inFile <- input$ics_file
     if (!is.null(inFile)) {
       mydf <- parse.data(readLines(inFile$datapath))
     }
