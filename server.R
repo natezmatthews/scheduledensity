@@ -72,7 +72,7 @@ function(input, output) {
   mydf <- parse.data(x)
   
   output$date_slider <- renderUI({
-    inFile <- input$icsfile
+    inFile <- input$ics_file
     if (!is.null(inFile)) {
       mydf <- parse.data(readLines(inFile$datapath))
     }
