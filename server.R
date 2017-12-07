@@ -59,8 +59,16 @@ weekday.plot <- function(df,fromdt,todt) {
       event.list <- df$summary[(half.hour.of.day(df$start) <= i)
                                & (half.hour.of.day(df$end) > i)
                                & (df$start$wday == j-1)]
-      toplot[[week.days[j]]][i] <- length(event.list) / half.hours.possible
-      toplot[[tool.tips[j]]][i] <- paste0(event.list,collapse="<br>")
+      
+      if (length(event.list) > 0) {
+        toplot[[week.days[j]]][i] <- length(event.list) / half.hours.possible
+        tooltip.string <- paste0(event.list,collapse="<br>")
+      } else {
+        # If GoogleVis gets the empty string it will display its default tootlip,
+        # which doesn't make sense for our application. Let's make it a space instead.
+        tooltip.string <- " "
+      }
+      toplot[[tool.tips[j]]][i] <- tooltip.string
     }
   }
   toplot <- cbind(toplot,Time=seq(
