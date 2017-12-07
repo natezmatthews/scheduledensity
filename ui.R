@@ -23,9 +23,10 @@ fluidPage(
       align="center",
       fileInput("ics_file","Choose ics file"),
       uiOutput("date_slider"),
-      selectInput("timezone_dropdown",
+      selectInput("tz_dropdown",
                   "Change time zone",
-                  OlsonNames()
+                  OlsonNames(),
+                  selected=Sys.timezone()
                   )
     )
   )

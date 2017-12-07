@@ -5,7 +5,7 @@ fc = file(description="www/natezmatthews@gmail.com.ics")
 x <- readLines(fc)
 close(fc)
 
-parse.data <- function(x) {
+parse.data <- function(x,input_tz) {
   # Turn it into a nice dataframe with a row per event I can use
   keyval <- do.call(rbind, regmatches(x, regexpr(":", x, fixed = TRUE), invert = TRUE))
   keyval <- keyval[which.max(keyval[,1]=="BEGIN" & keyval[,2]=="VEVENT"):tail(which(keyval[,1]=="END" & keyval[,2]=="VEVENT"), 1),]
@@ -19,8 +19,8 @@ parse.data <- function(x) {
   df$summary <- lapply(df$summary, as.character)
   df$start <- as.POSIXct(df$start,format="%Y%m%dT%H%M%SZ",tz="UTC") # POSIXlt for wkday
   df$end <- as.POSIXct(df$end,format="%Y%m%dT%H%M%SZ",tz="UTC") # POSIXlt for wkday
-  df$start <- as.POSIXlt(df$start,tz="EST") # POSIXlt for wkday
-  df$end <- as.POSIXlt(df$end,tz="EST") # POSIXlt for wkday
+  df$start <- as.POSIXlt(df$start,tz=input_tz) # POSIXlt for wkday
+  df$end <- as.POSIXlt(df$end,tz=input_tz) # POSIXlt for wkday
 
   return(df)  
 }
@@ -69,12 +69,12 @@ weekday.plot <- function(df,fromdt,todt) {
 }
 
 function(input, output) {
-  mydf <- parse.data(x)
-  
   output$date_slider <- renderUI({
     inFile <- input$ics_file
     if (!is.null(inFile)) {
-      mydf <- parse.data(readLines(inFile$datapath))
+      mydf <- parse.data(readLines(inFile$datapath),input$tz_dropdown)
+    } else {
+      mydf <- parse.data(x,input$tz_dropdown)
     }
     dateRangeInput("date_range",
                    "Restrict the date range",
@@ -86,7 +86,9 @@ function(input, output) {
   output$distPlot <- renderGvis({
     inFile <- input$ics_file
     if (!is.null(inFile)) {
-      mydf <- parse.data(readLines(inFile$datapath))
+      mydf <- parse.data(readLines(inFile$datapath),input$tz_dropdown)
+    } else {
+      mydf <- parse.data(x,input$tz_dropdown)
     }
     toplot <- weekday.plot(mydf,input$date_range[1],input$date_range[2])
     week.days <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
@@ -96,7 +98,6 @@ function(input, output) {
                         options=list(vAxis="{title:'% of weeks that have plans',
                                      format:'#,###%'}",
                                      tooltip="{isHtml:'true'}",
-                                     width="automatic",
                                      height=450))
   })
 }
