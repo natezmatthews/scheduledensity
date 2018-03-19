@@ -37,9 +37,11 @@ weekday.plot <- function(df,fromdt,todt) {
   
   half.hour.of.day <- function(x) {(x$hour*60 + x$min) %/% 30}
   half.hours.possible <- as.integer(as.POSIXct(Sys.Date()) - min(df$start))/7
-  week.days <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
+  week.days <- c("Sun","Mon","Tue","Wed","Thu","Fri","Sat")
   tool.tips = unlist(lapply(week.days,function(x){paste(x,"html","tooltip",sep=".")}))
-  toplot <- data.frame(Mon=numeric(24*2),
+  toplot <- data.frame(Sun=numeric(24*2),
+                       Sun.html.tooltip=character(24*2),
+                       Mon=numeric(24*2),
                        Mon.html.tooltip=character(24*2),
                        Tue=numeric(24*2),
                        Tue.html.tooltip=character(24*2),
@@ -51,8 +53,6 @@ weekday.plot <- function(df,fromdt,todt) {
                        Fri.html.tooltip=character(24*2),
                        Sat=numeric(24*2),
                        Sat.html.tooltip=character(24*2),
-                       Sun=numeric(24*2),
-                       Sun.html.tooltip=character(24*2),
                        stringsAsFactors=FALSE)
   for (j in 1:7) {
     for(i in 1:(24*2)) {
@@ -103,7 +103,7 @@ function(input, output) {
       mydf <- parse.data(x,input$tz_dropdown)
     }
     toplot <- weekday.plot(mydf,input$date_range[1],input$date_range[2])
-    week.days <- c("Mon","Tue","Wed","Thu","Fri","Sat","Sun")
+    week.days <- c("Sun","Mon","Tue","Wed","Thu","Fri","Sat")
     tool.tips = unlist(lapply(week.days,function(x){paste(x,"html","tooltip",sep=".")}))
     yvarcols = as.vector(t(cbind(week.days,tool.tips)))
     gvisLineChart(toplot,xvar="Time",yvar=yvarcols,
