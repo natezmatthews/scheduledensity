@@ -14,7 +14,8 @@ fluidPage(
                        align="center",
                        "When do I usually have plans?"
                 )
-             )
+             ),
+             windowTitle="When do I usually have plans?"
   ),
   
   fluidRow(
