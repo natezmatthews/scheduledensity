@@ -19,12 +19,14 @@ parse.data <- function(x,input_tz) {
   colnames(df)[colnames(df)=="2.DTEND"] <- "end"
   colnames(df)[colnames(df)=="2.SUMMARY"] <- "summary"
   
-  # Convert to datatypes I can use
   df$summary <- lapply(df$summary, as.character)
-  df$start <- as.POSIXct(df$start,format="%Y%m%dT%H%M%SZ",tz="UTC") # POSIXlt for wkday
-  df$end <- as.POSIXct(df$end,format="%Y%m%dT%H%M%SZ",tz="UTC") # POSIXlt for wkday
-  df$start <- as.POSIXlt(df$start,tz=input_tz) # POSIXlt for wkday
-  df$end <- as.POSIXlt(df$end,tz=input_tz) # POSIXlt for wkday
+  
+  # String to date conversion, using UTC
+  utc.start <- as.POSIXct(df$start,format="%Y%m%dT%H%M%SZ",tz="UTC")
+  utc.end <- as.POSIXct(df$end,format="%Y%m%dT%H%M%SZ",tz="UTC")
+  # Convert to the input timezone. I use POSIXlt for easy lookup of the day of the week
+  df$start <- as.POSIXlt(utc.start,tz=input_tz)
+  df$end <- as.POSIXlt(utc.end,tz=input_tz)
 
   return(df)  
 }
@@ -37,12 +39,19 @@ weekday.plot <- function(df,fromdt,todt) {
     df <- df[not.too.early & not.too.late,]
   }
   
+  # Function to give you which half hour of the day the input was,
+  # as an integer, i.e. was it the first half hour of the day? The fifth? Etc
   half.hour.of.day <- function(x) {(x$hour*60 + x$min) %/% 30}
+  
+  # How many half hours _could_ you have had something scheduled in?
   half.hours.possible <- as.integer(as.POSIXct(Sys.Date()) - min(df$start))/7
+  
   week.days <- c("Sun","Mon","Tue","Wed","Thu","Fri","Sat")
   half.hours.per.day <- 24*2
   
+  # This will give us Sun.html.tooltip, Mon.html.tooltip, etc, for Google Vis:
   tool.tips = unlist(lapply(week.days,function(x){paste(x,"html","tooltip",sep=".")}))
+  
   toplot <- data.frame(Sun=numeric(half.hours.per.day),
                        Sun.html.tooltip=character(half.hours.per.day),
                        Mon=numeric(half.hours.per.day),
