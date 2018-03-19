@@ -32,30 +32,34 @@ parse.data <- function(x,input_tz) {
 weekday.plot <- function(df,fromdt,todt) {
   # Restrict to the daterange from the slider
   if (!is.null(fromdt) & !is.null(todt)) {
-    df <- df[as.POSIXct(fromdt) <= df$start & as.POSIXct(todt) > df$end,] 
+    not.too.early <- as.POSIXct(fromdt) <= df$start
+    not.too.late <- as.POSIXct(todt) > df$end 
+    df <- df[not.too.early & not.too.late,]
   }
   
   half.hour.of.day <- function(x) {(x$hour*60 + x$min) %/% 30}
   half.hours.possible <- as.integer(as.POSIXct(Sys.Date()) - min(df$start))/7
   week.days <- c("Sun","Mon","Tue","Wed","Thu","Fri","Sat")
+  half.hours.per.day <- 24*2
+  
   tool.tips = unlist(lapply(week.days,function(x){paste(x,"html","tooltip",sep=".")}))
-  toplot <- data.frame(Sun=numeric(24*2),
-                       Sun.html.tooltip=character(24*2),
-                       Mon=numeric(24*2),
-                       Mon.html.tooltip=character(24*2),
-                       Tue=numeric(24*2),
-                       Tue.html.tooltip=character(24*2),
-                       Wed=numeric(24*2),
-                       Wed.html.tooltip=character(24*2),
-                       Thu=numeric(24*2),
-                       Thu.html.tooltip=character(24*2),
-                       Fri=numeric(24*2),
-                       Fri.html.tooltip=character(24*2),
-                       Sat=numeric(24*2),
-                       Sat.html.tooltip=character(24*2),
+  toplot <- data.frame(Sun=numeric(half.hours.per.day),
+                       Sun.html.tooltip=character(half.hours.per.day),
+                       Mon=numeric(half.hours.per.day),
+                       Mon.html.tooltip=character(half.hours.per.day),
+                       Tue=numeric(half.hours.per.day),
+                       Tue.html.tooltip=character(half.hours.per.day),
+                       Wed=numeric(half.hours.per.day),
+                       Wed.html.tooltip=character(half.hours.per.day),
+                       Thu=numeric(half.hours.per.day),
+                       Thu.html.tooltip=character(half.hours.per.day),
+                       Fri=numeric(half.hours.per.day),
+                       Fri.html.tooltip=character(half.hours.per.day),
+                       Sat=numeric(half.hours.per.day),
+                       Sat.html.tooltip=character(half.hours.per.day),
                        stringsAsFactors=FALSE)
   for (j in 1:7) {
-    for(i in 1:(24*2)) {
+    for(i in 1:(half.hours.per.day)) {
       event.list <- df$summary[(half.hour.of.day(df$start) <= i)
                                & (half.hour.of.day(df$end) > i)
                                & (df$start$wday == j-1)]
@@ -63,7 +67,7 @@ weekday.plot <- function(df,fromdt,todt) {
       if (length(event.list) > 0) {
         toplot[[week.days[j]]][i] <- length(event.list) / half.hours.possible
         tooltip.string <- paste0(event.list,collapse="<br>")
-      } else {
+      } else { # There are no events for this half hour of this weekday
         # If GoogleVis gets the empty string it will display its default tootlip,
         # which doesn't make sense for our application. Let's make it a space instead.
         tooltip.string <- " "
