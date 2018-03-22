@@ -44,7 +44,7 @@ weekday.plot <- function(df,fromdt,todt) {
   half.hour.of.day <- function(x) {(x$hour*60 + x$min) %/% 30}
   
   # How many half hours _could_ you have had something scheduled in?
-  half.hours.possible <- as.integer(as.POSIXct(Sys.Date()) - min(df$start))/7
+  half.hours.possible <- as.integer(max(df$end) - min(df$start))/7
   
   week.days <- c("Sun","Mon","Tue","Wed","Thu","Fri","Sat")
   half.hours.per.day <- 24*2
@@ -52,36 +52,38 @@ weekday.plot <- function(df,fromdt,todt) {
   # This will give us Sun.html.tooltip, Mon.html.tooltip, etc, for Google Vis:
   tool.tips = unlist(lapply(week.days,function(x){paste(x,"html","tooltip",sep=".")}))
   
-  toplot <- data.frame(Sun=numeric(half.hours.per.day),
-                       Sun.html.tooltip=character(half.hours.per.day),
-                       Mon=numeric(half.hours.per.day),
-                       Mon.html.tooltip=character(half.hours.per.day),
-                       Tue=numeric(half.hours.per.day),
-                       Tue.html.tooltip=character(half.hours.per.day),
-                       Wed=numeric(half.hours.per.day),
-                       Wed.html.tooltip=character(half.hours.per.day),
-                       Thu=numeric(half.hours.per.day),
-                       Thu.html.tooltip=character(half.hours.per.day),
-                       Fri=numeric(half.hours.per.day),
-                       Fri.html.tooltip=character(half.hours.per.day),
-                       Sat=numeric(half.hours.per.day),
-                       Sat.html.tooltip=character(half.hours.per.day),
+  # Initialize the dataframe with a zero and a space character for each half hour of the day
+  # I use a space instead of an empty string because if GoogleVis gets the empty string 
+  # it will display its default tootlip, which doesn't make sense for our application.
+  zeroes <- rep(0,half.hours.per.day)
+  spaces <- rep(" ",half.hours.per.day)
+  toplot <- data.frame(Sun=zeroes,
+                       Sun.html.tooltip=spaces,
+                       Mon=zeroes,
+                       Mon.html.tooltip=spaces,
+                       Tue=zeroes,
+                       Tue.html.tooltip=spaces,
+                       Wed=zeroes,
+                       Wed.html.tooltip=spaces,
+                       Thu=zeroes,
+                       Thu.html.tooltip=spaces,
+                       Fri=zeroes,
+                       Fri.html.tooltip=spaces,
+                       Sat=zeroes,
+                       Sat.html.tooltip=spaces,
                        stringsAsFactors=FALSE)
   for (j in 1:7) {
-    for(i in 1:(half.hours.per.day)) {
+    for(i in 1:half.hours.per.day) {
       event.list <- df$summary[(half.hour.of.day(df$start) <= i)
                                & (half.hour.of.day(df$end) > i)
                                & (df$start$wday == j-1)]
       
       if (length(event.list) > 0) {
+        # What % of half hours available had an event scheduled?
         toplot[[week.days[j]]][i] <- length(event.list) / half.hours.possible
-        tooltip.string <- paste0(event.list,collapse="<br>")
-      } else { # There are no events for this half hour of this weekday
-        # If GoogleVis gets the empty string it will display its default tootlip,
-        # which doesn't make sense for our application. Let's make it a space instead.
-        tooltip.string <- " "
+        # What were the names of those events?
+        toplot[[tool.tips[j]]][i] <- paste0(event.list,collapse="<br>")
       }
-      toplot[[tool.tips[j]]][i] <- tooltip.string
     }
   }
   toplot <- cbind(toplot,Time=seq(
